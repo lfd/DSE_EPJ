@@ -1,0 +1,32 @@
+FROM continuumio/miniconda3:latest
+SHELL ["/bin/bash", "-lc"]
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git ca-certificates \
+    build-essential python3-dev \
+    libffi-dev libssl-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+RUN git clone --depth 1 https://github.com/HilaSafi/DSE.git
+
+WORKDIR /opt/DSE
+ENV PYTHONPATH=/opt/DSE:/opt/DSE/src
+
+RUN conda update -n base -c defaults -y conda && \
+    conda create -y -n mapper_experiments python=3.10 && \
+    conda clean -afy
+
+# Make env python/pip the default (helps even outside activation)
+ENV PATH=/opt/conda/envs/mapper_experiments/bin:$PATH
+
+RUN test -f /opt/DSE/requirements_mapper.txt || (echo "ERROR: requirements_mapper.txt not found in /opt/DSE" && exit 1)
+
+RUN conda run -n mapper_experiments python -m pip install --upgrade pip setuptools wheel && \
+    conda run -n mapper_experiments python -m pip install --no-cache-dir -r /opt/DSE/requirements_mapper.txt
+
+COPY entrypoint_mapper.sh /usr/local/bin/entrypoint_mapper.sh
+RUN chmod +x /usr/local/bin/entrypoint_mapper.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint_mapper.sh"]
+CMD ["bash"]
