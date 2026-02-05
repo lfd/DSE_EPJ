@@ -35,21 +35,18 @@ Using Docker ensures the environment is identical across machines.
 From the repository root:
 
 ```bash
-docker build -t dse-device -f Dockerfile .
+docker build -t dse-device -f dockerfile . --no-cache
 
-docker run --rm -it -v "$PWD":/app dse-device \
-    python device_experiments/run_device_experiment.py
+docker run -it --rm dse-device
 
 ```
 
 # Build the image: mapper experiments
 ```bash
 
-docker build -t dse-mapper -f Dockerfile_mapper .
+docker build -t dse-mapper -f dockerfile_mapper . --no-cache
 
-
-docker run --rm -it -v "$PWD":/app dse-mapper \
-    python mapper_experiments/run_mapper_experiment.py
+docker run -it --rm dse-mapper
 
 ```
 ---
