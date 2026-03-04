@@ -1,32 +1,37 @@
+# syntax=docker/dockerfile:1
 FROM continuumio/miniconda3:latest
+
 SHELL ["/bin/bash", "-lc"]
 
+# System deps (keep what you really need)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git ca-certificates \
     build-essential python3-dev \
     libffi-dev libssl-dev \
  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt
-RUN git clone --depth 1 https://github.com/HilaSafi/DSE.git
-
 WORKDIR /opt/DSE
-ENV PYTHONPATH=/opt/DSE:/opt/DSE/src
+ENV PYTHONPATH=/opt/DSE
 
-RUN conda update -n base -c defaults -y conda && \
-    conda create -y -n mapper_experiments python=3.10 && \
+# Create conda env
+RUN conda create -y -n mapper_experiments python=3.12 && \
     conda clean -afy
 
-# Make env python/pip the default (helps even outside activation)
 ENV PATH=/opt/conda/envs/mapper_experiments/bin:$PATH
 
-RUN test -f /opt/DSE/requirements_mapper.txt || (echo "ERROR: requirements_mapper.txt not found in /opt/DSE" && exit 1)
+# Copy mapper requirements
+COPY requirements_mapper.txt /opt/DSE/requirements_mapper.txt
 
-RUN conda run -n mapper_experiments python -m pip install --upgrade pip setuptools wheel && \
-    conda run -n mapper_experiments python -m pip install --no-cache-dir -r /opt/DSE/requirements_mapper.txt
+# Install dependencies into mapper env
+RUN conda run -n mapper_experiments python -m pip install --upgrade pip && \
+    conda run -n mapper_experiments pip install -r /opt/DSE/requirements_mapper.txt
 
-COPY entrypoint_mapper.sh /usr/local/bin/entrypoint_mapper.sh
-RUN chmod +x /usr/local/bin/entrypoint_mapper.sh
+# Copy code + data
+COPY src/ /opt/DSE/src/
+COPY circuits/ /opt/DSE/circuits/
 
-ENTRYPOINT ["/usr/local/bin/entrypoint_mapper.sh"]
-CMD ["bash"]
+# Copy mapper entrypoint
+COPY src/entrypoint_mapper.sh /entrypoint_mapper.sh
+RUN chmod +x /entrypoint_mapper.sh
+
+ENTRYPOINT ["/entrypoint_mapper.sh"]

@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
 from qiskit_aer.noise import NoiseModel, depolarizing_error, phase_damping_error
-from topology_functions import *
+from DSE.src.libs.topology_functions import *
 
 
 def find_active_qubits(circuit):
@@ -17,6 +17,7 @@ def get_active_qubits(circuit):
         for qubit in qargs:
             active_qubits.add(qubit._index)  # Access the protected member _index
     return active_qubits
+
 
 def get_neighbors(q1_index, q2_index, coupling_map):
     # Find neighbors of qubit
@@ -60,6 +61,7 @@ def neighboring_noise_model_for_active_qubits_cx(base_error_prob, neighbor_error
 
     return noise_model, neighbors
 
+
 def neighboring_noise_model_for_active_qubits_id(base_error_prob, neighbor_error_prob, coupling_map, active_qubits):
     noise_model = NoiseModel()
     added_errors = set()
@@ -94,7 +96,7 @@ def neighboring_noise_model_for_active_qubits_id(base_error_prob, neighbor_error
     return noise_model
 
 
-#Adds noisy identity gates on the neighboring qubits when multiple CNOT (cx) gates are present.
+# Adds noisy identity gates on the neighboring qubits when multiple CNOT (cx) gates are present.
 def create_circ_with_ids(transpiled_circ, cmap, n_qubits):
     qubits_used = []
 
@@ -215,8 +217,9 @@ def create_circ_with_ids(transpiled_circ, cmap, n_qubits):
 
     return qc, circ_schedule
 
-#Adds noisy identities when there are multiple CNOT gates in a step.
-#Returns the new circuit and the circuit schedule.
+
+# Adds noisy identities when there are multiple CNOT gates in a step.
+# Returns the new circuit and the circuit schedule.
 def create_circ_with_ids_cxcx(transpiled_circ, cmap, n_qubits):
     qubits_used = []
     circ_data = list(transpiled_circ.data)
@@ -441,6 +444,7 @@ def create_circ_with_add_ids_when2qubit(transpiled_circ, n_qubits):
     qc.measure_all()
     return qc
 
+
 def create_circ_with_add_ids_when22qubit(transpiled_circ, n_qubits):
     qc = QuantumCircuit(n_qubits)
     id_inserted = set()  # To keep track of where id gates are inserted due to two-qubit operations
@@ -533,5 +537,3 @@ def create_circ_with_ids_cxcx__(transpiled_circ, cmap, n_qubits):
     qc.measure_all()
 
     return qc, list(neighbors)  # Convert neighbors to list before returning
-
-

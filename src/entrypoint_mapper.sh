@@ -1,13 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+source /opt/conda/etc/profile.d/conda.sh
+conda activate mapper_experiments
+
 # Always start in repo root
 cd /opt/DSE
 
 echo ""
-echo "Mapper container ready (conda env: mapper_experiments, Python 3.10)"
+echo "Mapper container ready (conda env: mapper_experiments, Python 3.12)"
 echo "Repo: /opt/DSE"
 echo ""
+
+# ---- If user provided a command (custom run), execute it inside the env
+# This prevents "No module named pandas" when running custom params.
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
 
 # Required defaults for your CLI
 CIRCUITS_DIR="${CIRCUITS_DIR:-circuits}"
@@ -20,14 +29,13 @@ mkdir -p "$(dirname "$OUT_FILE")"
 DEFAULT_ARGS=(--circuits-dir "$CIRCUITS_DIR" --out "$OUT_FILE")
 
 # Debug (optional)
-conda run -n mapper_experiments python -c "import sys; print('Python:', sys.executable)"
-conda run -n mapper_experiments python -c "import pandas as pd; print('pandas OK', pd.__version__)"
+python -c "import sys; print('Python:', sys.executable)"
+python -c "import pandas as pd; print('pandas OK', pd.__version__)"
 echo "Default args: ${DEFAULT_ARGS[*]}"
 echo ""
 
 run_default() {
-  exec conda run --no-capture-output -n mapper_experiments \
-    python -u src/run_mapper_experiments.py "${DEFAULT_ARGS[@]}"
+  exec python -u src/run_mapper_experiments.py "${DEFAULT_ARGS[@]}"
 }
 
 # Non-interactive default
@@ -40,6 +48,6 @@ read -r -p "Run default mapper experiments now? [y/N]: " ans
 if [[ "$ans" =~ ^([yY][eE][sS]|[yY])$ ]]; then
   run_default
 else
-  echo "Dropping you into a shell with mapper_experiments activated."
-  exec bash -lc "source /opt/conda/etc/profile.d/conda.sh && conda activate mapper_experiments && cd /opt/DSE && exec bash -i"
+  echo "Dropping you into a shell. You're in /opt/DSE with env activated."
+  exec bash --noprofile --norc
 fi

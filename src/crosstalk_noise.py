@@ -1,8 +1,5 @@
-from qiskit import QuantumCircuit, transpile
-from qiskit.circuit import Gate
-from qiskit.transpiler import CouplingMap
-from topology_functions import *
-from qiskit_aer.noise import NoiseModel, depolarizing_error, thermal_relaxation_error
+from qiskit import QuantumCircuit
+from qiskit_aer.noise import NoiseModel, depolarizing_error
 
 
 def neighboring_noise_model_for_active_qubits_id(base_error_prob, neighbor_error_prob, coupling_map, active_qubits):
@@ -87,29 +84,3 @@ def create_circ_with_add_ids_when22qubit(transpiled_circ, n_qubits):
 
     qc.measure_all()
     return qc
-
-
-if __name__ == "__main__":# Example usage
-    # Add CX gates
-    # Initialize the circuit with sufficient qubits
-    qc = QuantumCircuit(20)  # At least as many qubits as the highest index used
-
-    # Now add your gates
-    qc.cx(0, 1)
-    #  qc.cx(2, 3)
-    qc.h(1)
-    qc.x(3)
-    qc.y(0)
-    qc.z(5)
-    qc.h(7)
-    qc.s(10)
-    qc.t(11)
-
-    # Draw the circuit
-    print(qc.draw())
-
-
-    cmap = create_heavy_hex_IBMQ(6, 3)
-
-  #  new_qc = add_identity_to_gates(qc)
-  #  print(new_qc)

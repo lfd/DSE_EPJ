@@ -11,12 +11,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, Union
 from qiskit.converters import circuit_to_dag
 from functools import reduce
-
 from qiskit import QuantumCircuit, transpile
 from qiskit.providers.fake_provider import Fake127QPulseV1
-
-from src.topology_functions import create_sycamore_topology, create_heavy_hex_IBMQ, increase_coupling_density
-
+from src.libs.topology_functions import create_sycamore_topology, create_heavy_hex_IBMQ, increase_coupling_density
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # -------------------------
 # Repo-relative paths
@@ -36,12 +35,12 @@ class ExperimentConfig:
     results_dir: Path = DEFAULT_RESULTS_DIR
 
     # Experiment sweep knobs
-    backend_sizes: List[Tuple[int, int]] = field(default_factory=lambda: [(6, 6), (12, 12)])
+    backend_sizes: List[Tuple[int, int]] = field(default_factory=lambda: [(6,6)]) #[(6, 6), (12, 12)])
     opt_levels: List[int] = field(default_factory=lambda: [0])
-    connectivity_density: List[float] = field(default_factory=lambda: [
-        0.013895, 0.015, 0.018, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05,
-        0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0
-    ])
+    connectivity_density: List[float] = field(default_factory=lambda: [ 0.013895, 0.015])
+  #      0.013895, 0.015, 0.018, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05,
+  #      0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0
+  #  ])
 
     # Crosstalk
     crosstalk_version: str = "topology"  # "cxneighbors", "topology",
@@ -174,7 +173,6 @@ class ExperimentsNew:
     def calculate_thermal_relaxation_fidelity(self, qubits, properties):
         fidelity = 1.0
         for qubit in qubits:
-            print(qubit)
             if qubit < len(properties.qubits):
                 t1 = properties.qubits[qubit][1].value  # T1 relaxation time
                 t2 = properties.qubits[qubit][2].value  # T2 dephasing time
@@ -189,10 +187,6 @@ class ExperimentsNew:
         if not any(inst[0].name == "measure" for inst in quantum_circuit.data):
             # Add measurements to all qubits if none exist
             quantum_circuit.measure_all()
-            print("Measurement gates added to the circuit.")
-        else:
-            print("Circuit already contains measurement gates.")
-
         return quantum_circuit
 
     def remove_measure_gates(self, circuit):

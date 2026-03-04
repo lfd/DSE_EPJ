@@ -3,32 +3,31 @@ FROM continuumio/miniconda3:latest
 
 SHELL ["/bin/bash", "-lc"]
 
-# System deps (git to clone; optional: build tools if some wheels need compiling)
+# System deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt
-
-# Clone repo
-RUN git clone --depth 1 https://github.com/HilaSafi/DSE.git
-
 WORKDIR /opt/DSE
 ENV PYTHONPATH=/opt/DSE
 
-# Create conda env
-RUN conda create -y -n device_experiments python=3.10 && \
+# Create conda env (ONLY change is python version)
+RUN conda create -y -n device_experiments python=3.12 && \
     conda clean -afy
 
 ENV PATH=/opt/conda/envs/device_experiments/bin:$PATH
 
-# Install requirements from repo root (NOT src/)
-RUN conda run -n device_experiments python -m pip install --upgrade pip && \
-    conda run -n device_experiments pip install -r requirements.txt
+# Copy requirements from repo root
+COPY requirements.txt /opt/DSE/requirements.txt
 
-# Copy entrypoint script into image
-COPY entrypoint.sh /entrypoint.sh
+# Install dependencies
+RUN conda run -n device_experiments python -m pip install --upgrade pip && \
+    conda run -n device_experiments pip install -r /opt/DSE/requirements.txt
+
+COPY src/ /opt/DSE/src/
+COPY circuits/ /opt/DSE/circuits/
+# Copy entrypoint from src/
+COPY src/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Default command: start interactive prompt script
 ENTRYPOINT ["/entrypoint.sh"]

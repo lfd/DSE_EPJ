@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Reproducible benchmark transpilation runner (CLI).
 
@@ -14,16 +13,13 @@ Notes:
 """
 
 from __future__ import annotations
-
 import argparse
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
-
 import pandas as pd
 from multiprocessing import Pool, cpu_count
-
 from qiskit import QuantumCircuit, transpile
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.passes import (
@@ -37,11 +33,7 @@ from qiskit.transpiler.passes import (
     CXCancellation,
     HoareOptimizer,
 )
-
-# Your topology util (must provide increase_coupling_density)
-import src.topology_functions as tf
-
-# Optional: for building a simple "starting backend" coupling map in the same shape as your old code.
+import libs.src.topology_functions as tf
 try:
     from qiskit.providers.fake_provider import ConfigurableFakeBackend
 except Exception:

@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Reproducible benchmark transpilation runner (CLI).
-
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -11,10 +5,8 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
-
 import pandas as pd
 from multiprocessing import Pool, cpu_count
-
 from qiskit import QuantumCircuit, transpile
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.passes import (
@@ -28,9 +20,7 @@ from qiskit.transpiler.passes import (
     CXCancellation,
     HoareOptimizer,
 )
-
-# Your topology util (must provide increase_coupling_density)
-import src.topology_functions as tf
+import src.libs.topology_functions as tf
 
 # Optional: for building a simple "starting backend" coupling map in the same shape as your old code.
 try:
@@ -251,9 +241,9 @@ def process_one_benchmark(args) -> List[List[object]]:
                         gate_types_after = dict(tr.count_ops())
 
                         twoq_after = (
-                            gate_types_after.get("cz", 0)
-                            + gate_types_after.get("cx", 0)
-                            + 3 * swaps
+                                gate_types_after.get("cz", 0)
+                                + gate_types_after.get("cx", 0)
+                                + 3 * swaps
                         )
 
                         rows.append([

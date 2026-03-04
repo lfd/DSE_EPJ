@@ -35,18 +35,18 @@ Using Docker ensures the environment is identical across machines.
 From the repository root:
 
 ```bash
-docker build -t dse-device -f dockerfile . --no-cache
+docker build -t dse-device -f src/dockerfile . --no-cache
 
-docker run -it --rm dse-device
+docker run -it dse-device
 
 ```
 
 # Build the image: mapper experiments
 ```bash
 
-docker build -t dse-mapper -f dockerfile_mapper . --no-cache
+docker build -t dse-mapper -f src/dockerfile_mapper . --no-cache
 
-docker run -it --rm dse-mapper
+docker run -it dse-mapper
 
 ```
 ---
